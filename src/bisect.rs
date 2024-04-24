@@ -1,14 +1,9 @@
-// works with real Rust code
-//     support: data structures, generics, traits, closure, unsafe code
-//     probably not support: concurrency, I/O
-// works on "unoptimized MIR", MIR that preserves information of the source code
-// uses the compiler, run cargo-prusti
-// proofs are macros that gets checked at compile time and does not change the generated code
-
+// NOTE that monotonicity does not matter for Prusti!
 
 use prusti_contracts::*;
 
-/// A monotonically increasing discrete function, with domain [0, domain_size)
+// A monotonically increasing discrete function, e.g. { |x| lookup(l, x) }
+// with domain [0, domain_size)
 trait Function {
     #[pure]
     fn domain_size(&self) -> usize;
@@ -21,6 +16,7 @@ trait Function {
 /// Find the `x` s.t. `f(x) == target`
 #[requires(f.domain_size() < usize::MAX/2 as usize)]
 #[ensures(if let Some(x) = result { f.eval(x) == target } else { true })]
+// bisect(f,target)=Some(_) <-> exists i, f(i)=target
 fn bisect<T: Function>(f: &T, target: i32) -> Option<usize> {
     let mut low = 0;
     let mut high = f.domain_size();
